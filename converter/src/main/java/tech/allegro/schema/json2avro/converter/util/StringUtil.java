@@ -9,11 +9,10 @@ public class StringUtil {
     return value != null && value.matches("^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$");
   }
 
-  public static String decodeBase64(String string) {
+  public static byte[] decodeBase64(String string) {
     if (isBase64(string)) {
-      byte[] decoded = Base64.getDecoder().decode(string);
-      return new String(decoded, StandardCharsets.UTF_8);
+      return Base64.getDecoder().decode(string);
     }
-    return string;
+    return string.getBytes(StandardCharsets.UTF_8);
   }
 }

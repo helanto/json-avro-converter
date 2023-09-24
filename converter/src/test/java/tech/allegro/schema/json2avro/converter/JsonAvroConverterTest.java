@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -113,4 +115,29 @@ public class JsonAvroConverterTest {
     assertEquals(avroObject, JsonHelper.deserialize(actualAvroObject.toString()), String.format("Test for %s failed", testCaseName));
   }
 
+  @Test
+  public void testJsonToAvroConverterBinary() throws JsonProcessingException {
+    String base64String = "4E/QIOo6aRCi2AgAKzAwnQ=="; // Corresponds to Hex: e04fd020ea3a6910a2d808002b30309d
+    // This works because all bytes have a mapping when using UTF-8 encoding.
+    // String base64String = "ckBuZDBtVDN4dAo=";
+    final JsonAvroConverter converter = JsonAvroConverter.builder()
+            .build();
+    final String avroSchema = """
+      {
+        "type": "record",
+        "name": "test_schema",
+        "fields": [
+          {
+            "name": "binary_field_base64",
+            "type": "bytes"
+          }
+        ]
+      }""";
+    final Schema schema =  new Schema.Parser().parse(avroSchema);
+    final JsonNode jsonObject = JsonHelper.deserialize(String.format("{\"binary_field_base64\":\"%s\"}", base64String));
+    final GenericData.Record actualAvroObject = converter.convertToGenericDataRecord(WRITER.writeValueAsBytes(jsonObject), schema);
+
+    java.nio.ByteBuffer retrievedByteBuffer = (java.nio.ByteBuffer) actualAvroObject.get("binary_field_base64");
+    Assertions.assertArrayEquals(java.util.Base64.getDecoder().decode(base64String), retrievedByteBuffer.array());
+  }
 }

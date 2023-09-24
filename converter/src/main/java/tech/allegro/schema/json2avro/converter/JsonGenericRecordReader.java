@@ -318,7 +318,7 @@ public class JsonGenericRecordReader {
 
     private ByteBuffer bytesForString(String string) {
         if (StringUtil.isBase64(string)) {
-            return ByteBuffer.wrap(StringUtil.decodeBase64(string).getBytes(StandardCharsets.UTF_8));
+            return ByteBuffer.wrap(StringUtil.decodeBase64(string));
         }
         return ByteBuffer.wrap(string.getBytes(StandardCharsets.UTF_8));
     }
